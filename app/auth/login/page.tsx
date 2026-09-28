@@ -25,8 +25,14 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/member");
-    router.refresh();
+    const { data: { user } } = await supabase.auth.getUser();
+if (!user) { setMessage("Oturum alınamadı."); setLoading(false); return; }
+const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+if (!profile) { setMessage("Kullanıcı profili bulunamadı."); setLoading(false); return; }
+if (profile.role === "operator") router.push("/operator");
+else if (profile.role === "system_admin") router.push("/admin");
+else router.push("/member");
+router.refresh();
   }
 
   return (
